@@ -1,8 +1,9 @@
 "use client"
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { enviarArchivo } from "@/app/servicio"
+import { procesarSVM, procesarRoBERTa, procesarSimpleNet } from "@/app/servicio"
 import "./progressBar.css"
+import { Bird, Fish, Snail } from "lucide-react";
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState<boolean | null>(null)
@@ -12,6 +13,8 @@ export default function Home() {
   const [isLooping3, setIsLooping3] = useState(false);
   const [percent, setPercent] = useState(0)
   const [result, setResult] = useState<{ predicted_label: number; prob: number } | null>(null);
+  const [selectedModel, setSelectedModel] = useState<number>(0);
+  const models = ["snil", "fish", "bird"]
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,35 +84,73 @@ export default function Home() {
   const handleUpload = async (input: React.ChangeEvent<HTMLInputElement> | File) => {
     const file = input instanceof File ? input : input.target.files?.[0]
     if (!file) return
-    console.log("Hola antes")
     setIsDragging(true)
-    let result = await enviarArchivo(file)
+    let result
+    if (selectedModel == 0) {
+      result = await procesarSVM(file)
+    }
+    if (selectedModel == 1) {
+      result = await procesarRoBERTa(file)
+    }
+    if (selectedModel == 2) {
+      result = await procesarSimpleNet(file)
+    }
+    if (result == null) { return }
     setResult(result)
-    console.log("Resultado de enviarArchivo:", result)
     setIsDragging(false)
   }
 
   return (
     <div className="flex flex-col gap-7 min-h-screen items-center justify-center bg-linear-to-tr/hsl from-sky-950 from-20% to-cyan-950 to-80%  font-sans px-5">
       <h1 className="momo-trust-display-regular text-4xl text-amber-400 text-center">Detector de IA en textos académicos</h1>
-      {progress.length == 0 && <div className="border-cyan-400 border-4 border-dotted p-7 rounded-xl"
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
-        onDrop={(e) => {
-          e.preventDefault()
-          setIsDragging(false)
-          const file = e.dataTransfer.files?.[0]
-          if (file.type === "application/pdf" || file.name.endsWith(".txt")) {
-            handleUpload(file) // <-- ahora funciona sin convertir el evento
-          }
-        }}>
-        <p className="momo-trust-display-regular text-cyan-400 text-xl text-center mb-5">Sube ingresa o arrasta un archivo txt o pdf</p>
-        <div className="flex justify-center">
-          <button className="momo-trust-display-regular text-center text-white text-base border-2 border-white p-2 rounded-lg"
-            onClick={() => fileInputRef.current?.click()}>Subir archivo</button>
-        </div>
-        <input type="file" accept=".txt,.pdf" className="hidden" ref={fileInputRef} onChange={handleUpload}></input>
-      </div>}
+      {progress.length == 0 &&
+        <div className="border-amber-400 border-2 p-7 rounded-2xl">
+          <div className="border-cyan-400 border-4 border-dotted p-7 rounded-xl hover:bg-cyan-400/5"
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsDragging(false)
+              const file = e.dataTransfer.files?.[0]
+              if (file.type === "application/pdf" || file.name.endsWith(".txt")) {
+                handleUpload(file) // <-- ahora funciona sin convertir el evento
+              }
+            }}>
+            <p className="momo-trust-display-regular text-cyan-400 text-xl text-center mb-5">Sube ingresa o arrasta un archivo txt o pdf</p>
+            <div className="flex justify-center">
+              <button className="momo-trust-display-regular text-center text-white text-base border-2 border-white p-2 rounded-lg hover:bg-white/10"
+                onClick={() => fileInputRef.current?.click()}>Subir archivo</button>
+            </div>
+            <input type="file" accept=".txt,.pdf" className="hidden" ref={fileInputRef} onChange={handleUpload}></input>
+
+          </div>
+          <div className="flex flex-col p-5">
+            <p className="momo-trust-display-regular text-white text-xl text-center mb-5">Elige el modo de detección</p>
+            <div className="flex justify-center gap-5">
+              <button className={`momo-trust-display-regular text-center text-white text-base border-2 border-white p-2 rounded-lg ${selectedModel == 0 ? "bg-white/15" : ""} hover:bg-white/5`}
+                onClick={() => setSelectedModel(0)}>
+                <div className="flex flex-col p-2 gap-2">
+                  <Snail className="w-10 h-10"></Snail>
+                  Snail
+                </div>
+              </button>
+              {/*<button className={`momo-trust-display-regular text-center text-white text-base border-2 border-white p-2 rounded-lg ${selectedModel == 1 ? "bg-white/15" : ""} hover:bg-white/5`}
+                onClick={() => setSelectedModel(1)}>
+                <div className="flex flex-col p-2 gap-2">
+                  <Fish className="w-10 h-10"></Fish>
+                  Snail
+                </div>
+              </button>
+              <button className={`momo-trust-display-regular text-center text-white text-base border-2 border-white p-2 rounded-lg ${selectedModel == 2 ? "bg-white/15" : ""} hover:bg-white/5`}
+                onClick={() => setSelectedModel(2)}>
+                <div className="flex flex-col p-2 gap-2">
+                  <Bird className="w-10 h-10"></Bird>
+                  Bird
+                </div>
+              </button>*/}
+            </div>
+          </div>
+        </div>}
       {progress != undefined && progress.length > 0 && progress.length <= frase.length &&
         <div className="progress-wrapper">
           <div className="progress-text">{progress}</div>
