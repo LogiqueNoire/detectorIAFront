@@ -32,6 +32,7 @@ export async function procesarRoBERTa(file) {
       `${URL}/predict/roberta`,
       formData,
       {
+        timeout: 60000,
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -53,7 +54,7 @@ export async function procesarMLP(file) {
       `${URL}/predict/mlp`,
       formData,
       {
-        timeout: 30000,
+        timeout: 60000,
         headers: {
           "Content-Type": "multipart/form-data",
         },
