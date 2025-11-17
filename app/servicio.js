@@ -20,6 +20,7 @@ export async function procesarSVM(file) {
     return response.data;
   } catch (error) {
     console.error("Error al enviar archivo:", error);
+    return null
   }
 }
 
@@ -32,6 +33,7 @@ export async function procesarRoBERTa(file) {
       `${URL}/predict/roberta`,
       formData,
       {
+        timeout: 120000,
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -41,6 +43,7 @@ export async function procesarRoBERTa(file) {
     return response.data;
   } catch (error) {
     console.error("Error al enviar archivo:", error);
+    return null
   }
 }
 
@@ -53,6 +56,7 @@ export async function procesarMLP(file) {
       `${URL}/predict/mlp`,
       formData,
       {
+        timeout: 60000,
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -62,5 +66,6 @@ export async function procesarMLP(file) {
     return response.data;
   } catch (error) {
     console.error("Error al enviar archivo:", error);
+    return null
   }
 }
