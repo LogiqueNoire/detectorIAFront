@@ -8,7 +8,7 @@ export async function procesarSVM(file) {
 
   try {
     const response = await axios.post(
-      `${URL}/predict`,
+      `${URL}/predict/svm`,
       formData,
       {
         headers: {
@@ -44,13 +44,13 @@ export async function procesarRoBERTa(file) {
   }
 }
 
-export async function procesarSimpleNet(file) {
+export async function procesarMLP(file) {
   const formData = new FormData();
   formData.append("file", file);
 
   try {
     const response = await axios.post(
-      `${URL}/predict/simplenet`,
+      `${URL}/predict/mlp`,
       formData,
       {
         headers: {
