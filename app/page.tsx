@@ -193,7 +193,7 @@ export default function Home() {
                     <div className="momo-trust-display-regular text-lg text-lime-900 text-left">Nombre</div>
                   </th>
                   <th className="pb-3">
-                    <div className="momo-trust-display-regular text-lg text-right ps-8">{filename}</div>
+                    <div className="momo-trust-display-regular text-lg text-right ps-8 w-56 truncate">{filename}</div>
                   </th>
                 </tr>
               </thead>
