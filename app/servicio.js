@@ -53,6 +53,7 @@ export async function procesarMLP(file) {
       `${URL}/predict/mlp`,
       formData,
       {
+        timeout: 30000,
         headers: {
           "Content-Type": "multipart/form-data",
         },
