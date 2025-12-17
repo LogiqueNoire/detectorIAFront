@@ -1,9 +1,10 @@
 "use client"
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { procesarSVM, procesarRoBERTa, procesarMLP } from "@/app/servicio"
+import { procesarModelo } from "@/app/servicio"
 import "./progressBar.css"
 import { Bird, Fish, Snail, Turtle } from "lucide-react";
+import { extractTextFromPDF } from "./extractorTexto";
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState<boolean | null>(null)
@@ -91,15 +92,23 @@ export default function Home() {
     if (!file) return
     setIsDragging(true)
     setError(false)
+    let text
+    if (file.type === "application/pdf") {
+      text = await extractTextFromPDF(file)
+    }
+    if (file.type === "text/plain") {
+      text = await file.text()
+    }
+    console.info("pasó")
     let result
     if (selectedModel == 0) {
-      result = await procesarSVM(file)
+      result = await procesarModelo("svm", text)
     }
     if (selectedModel == 1) {
-      result = await procesarRoBERTa(file)
+      result = await procesarModelo("roberta", text, 120000)
     }
     if (selectedModel == 2) {
-      result = await procesarMLP(file)
+      result = await procesarModelo("mlp", text)
     }
     if (result == null) {
       setIsDragging(false)
@@ -142,7 +151,7 @@ export default function Home() {
               <div className="flex justify-center gap-3 xs:gap-5">
                 <div className="relative">
                   <button className={`momo-trust-display-regular text-center text-orange-600 text-base border-3 border-orange-600 p-2 rounded-lg ${selectedModel == 0 ? "bg-orange-600/10" : ""} hover:bg-white/40`}
-                    onClick={() => setSelectedModel(0)} onMouseEnter={() => {setShowFish(true); setTimeout(() => setShowFish(false), 2000)}}>
+                    onClick={() => setSelectedModel(0)} onMouseEnter={() => { setShowFish(true); setTimeout(() => setShowFish(false), 2000) }}>
                     <div className="flex flex-col p-1 xxs:p-1.5 xs:p-2 gap-2 items-center">
                       <Fish className="w-10 h-10"></Fish>
                       Fish
@@ -152,7 +161,7 @@ export default function Home() {
                 </div>
                 <div className="relative">
                   <button className={`momo-trust-display-regular text-center text-cyan-600 text-base border-3 border-cyan-600 p-2 rounded-lg ${selectedModel == 1 ? "bg-cyan-300/20" : ""} hover:bg-white/30`}
-                    onClick={() => setSelectedModel(1)} onMouseEnter={() => {setShowTurtle(true); setTimeout(() => setShowTurtle(false), 2000)}}>
+                    onClick={() => setSelectedModel(1)} onMouseEnter={() => { setShowTurtle(true); setTimeout(() => setShowTurtle(false), 2000) }}>
                     <div className="flex flex-col p-1 xxs:p-1.5 xs:p-2 gap-1 items-center">
                       <Turtle className="w-11 h-11"></Turtle>
                       Turtle
@@ -169,7 +178,7 @@ export default function Home() {
                 </button>*/}
                 <div className="relative">
                   <button className={`momo-trust-display-regular text-center text-violet-800 text-base border-3 border-violet-800 p-2 rounded-lg ${selectedModel == 2 ? "bg-violet-300/50" : ""} hover:bg-white/40`}
-                    onClick={() => setSelectedModel(2)} onMouseEnter={() => {setShowSnail(true); setTimeout(() => setShowSnail(false), 2000)}}>
+                    onClick={() => setSelectedModel(2)} onMouseEnter={() => { setShowSnail(true); setTimeout(() => setShowSnail(false), 2000) }}>
                     <div className="flex flex-col p-1 xxs:p-1.5 xs:p-2 gap-2 items-center">
                       <Snail className="w-10 h-10"></Snail>
                       Snail
