@@ -62,7 +62,7 @@
     top: 50px;
     width: 200%;
     background-repeat: repeat-x;
-    background-image: url('../assets/wave.svg');
+    background-image: url('@/assets/wave.svg');
     z-index: 2;
     box-sizing: border-box;
     opacity: 0.2;
@@ -72,7 +72,7 @@
 
 .wave2 {
     top: 55px;
-    background-image: url('../assets/wave.svg');
+    background-image: url('@/assets/wave.svg');
     z-index: 3;
     animation-delay: -3s;
     box-sizing: border-box;
@@ -82,7 +82,7 @@
 
 .wave3 {
     top: 60px;
-    background-image: url('../assets/wave.svg');
+    background-image: url('@/assets/wave.svg');
     z-index: 4;
     animation-delay: -1.5s;
     box-sizing: border-box;
