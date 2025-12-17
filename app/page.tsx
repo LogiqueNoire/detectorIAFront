@@ -16,7 +16,6 @@ export default function Home() {
   const [filename, setFileName] = useState("")
   const [result, setResult] = useState<{ predicted_label: number; prob: number } | null>(null);
   const [selectedModel, setSelectedModel] = useState<number>(0);
-  const models = ["snil", "fish", "bird"]
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState(false)
