@@ -38,3 +38,7 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+.circuloResult{
+  border-image: linear-gradient(to right, #22d3ee, #8b5cf6) 1
+}

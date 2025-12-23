@@ -9,10 +9,16 @@ import ProgressBar from "./progressBar/progressBar";
 
 export default function Home() {
   const [isProcessing, setIsProcessing] = useState<boolean | null>(null)
-  const frase = "Procesando archivo..."
+  const [frase, setFrase] = useState("Procesando archivo...")
+  const [movil, setMovil] = useState(false)
+  useEffect(() => {
+    window.innerWidth > 425 ? setFrase("Procesando archivo...") : setFrase("Procesando...")
+    window.innerWidth < 650 ? setMovil(true) : setMovil(false)
+  }, [])
 
   const [filename, setFileName] = useState("")
   const [caracteres, setCaracteres] = useState(0)
+  const [size, setSize] = useState("")
   const [result, setResult] = useState<{ predicted_label: number; prob: number } | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<number>(0);
@@ -36,7 +42,9 @@ export default function Home() {
     if (file.type === "text/plain") {
       text = await file.text()
     }
-    console.info("pasó")
+    setFileName(file.name)
+    text && setCaracteres(text.length)
+    setSize(file.size < 1024 * 1024 ? `${(file.size / 1024).toFixed(2)} kB` : (file.size < 1024 * 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : `${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB`))
     let result
     if (selectedModel == 0) {
       result = await procesarModelo("svm", text)
@@ -53,15 +61,13 @@ export default function Home() {
       return
     }
     setResult(result)
-    setFileName(file.name)
-    text && setCaracteres(text.length)
     setIsProcessing(false)
   }
 
   return (
     <div className="flex flex-col gap-7 min-h-screen items-center justify-center bg-linear-to-tr/hsl from-slate-50 from-20% to-slate-100 to-80%  font-sans px-6">
       <Fondo color1="bg-amber-300" color2="bg-lime-400"></Fondo>
-      <div className="flex flex-col gap-7 min-h-screen items-center justify-center font-sans px-5 z-10">
+      <div className={`flex flex-col gap-7 min-h-screen items-center justify-center font-sans px-5 z-10 ${movil && result ? "py-20" : ""}`}>
         <h1 className="momo-trust-display-regular text-4xl text-yellow-700 text-center">Detector de IA en textos académicos</h1>
         {isProcessing !== true && //progress.length == 0
           <div className="border-yellow-700 border-3 p-7 rounded-2xl">
@@ -120,36 +126,74 @@ export default function Home() {
             </div>
           </div>}
         {isProcessing && <ProgressBar frase={frase} isProcessing={isProcessing}></ProgressBar>}
-        {error &&
-          <div className="bg-linear-to-tr from-red-500/50 to-red-600/70 rounded-2xl p-5 momo-trust-display-regular text-white text-lg">
-            Error al cargar el archivo
-          </div>}
-        {result &&
+        {filename && caracteres &&
           <div className="bg-linear-to-tr from-white/50 to-white/70 rounded-2xl p-5">
+            <div className="momo-trust-display-regular text-center text-lg text-yellow-700 mb-3">Datos del archivo</div>
             <table>
               <thead>
                 <tr>
-                  <th className="pb-3 momo-trust-display-regular text-lg text-lime-900 text-left">Nombre</th>
-                  <th className="pb-3"><div className="momo-trust-display-regular text-lg text-right ps-8 w-56 truncate">{filename}</div></th>
+                  <th className="pb-3 momo-trust-display-regular text-lg text-lime-800 text-left">Nombre</th>
+                  <th className="pb-3"><div className="momo-trust-display-regular text-lg text-right ps-2 xs:ps-8 w-48 xs:w-56 truncate">{filename}</div></th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="pb-3 momo-trust-display-regular text-lg text-lime-900">Caracteres</td>
+                  <td className="pb-3 momo-trust-display-regular text-lg text-lime-800">Caracteres</td>
                   <td className="pb-3 momo-trust-display-regular text-lg text-right">{caracteres}</td>
                 </tr>
                 <tr>
-                  <td className="pb-3 momo-trust-display-regular text-lg text-lime-900 text-left">Resultado</td>
-                  <td className="pb-3 momo-trust-display-regular text-lg text-right ps-8">{result.predicted_label == 0 ? "Escrito por humano" : "Escrito con IA"}</td>
+                  <td className="pb-3 momo-trust-display-regular text-lg text-lime-800">Tamaño</td>
+                  <td className="pb-3 momo-trust-display-regular text-lg text-right">{size}</td>
+                </tr>
+                {/*
+                <tr>
+                  <td className="pb-3 momo-trust-display-regular text-lg text-lime-800 text-left">Resultado</td>
+                  <td className="pb-3 momo-trust-display-regular text-lg text-right ps-2 xs:ps-8">{result.predicted_label == 0 ? "Escrito por humano" : "Escrito con IA"}</td>
                 </tr>
                 <tr>
-                  <td className="momo-trust-display-regular text-lg text-lime-900 text-left">Confianza</td>
+                  <td className="momo-trust-display-regular text-lg text-lime-800 text-left">Confianza</td>
                   <td className="momo-trust-display-regular text-lg text-right">{(Number(result.prob.toFixed(4)) * 100).toFixed(2)}%</td>
                 </tr>
+                */}
               </tbody>
             </table>
+            {result && <div className="">
+              <div className="momo-trust-display-regular text-center text-lg text-yellow-700 mb-2">Resultado</div>
+              <div className="flex momo-trust-display-regular text-lg gap-2 items-center justify-start">
+                <div className="text-center">
+                  {result.predicted_label == 0 ?
+                    <div className="flex text-right gap-2 items-end">
+                      <span className="text-xl">Escrito por humano</span>
+                    </div>
+                    :
+                    <div className="flex text-right gap-2 items-center">
+                      <div>
+                        <span className="text-xl">Escrito</span>
+                        <br></br>
+                        <span className="text-xl text-right">con</span>
+                      </div>
+                      <span className="text-6xl">{"IA"}</span>
+                    </div>
 
+                  }
+                </div>
+              </div>
+              <div className="">
+                <div className="rounded-full w-full h-3 bg-linear-to-r/shorter from-gray-400 to-gray-300">
+                  <div className="rounded-full h-3 overflow-hidden" style={{ width: `${(Number(result.prob.toFixed(4)) * 100).toFixed(2)}%` }}>
+                    <div className="rounded-full w-73 xs:w-80 h-3 bg-linear-to-r/hsl from-amber-500 to-lime-500">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full text-xl momo-trust-display-regular text-end mt-1">{`Confianza: ${(Number(result.prob.toFixed(4)) * 100).toFixed(2)}%`}</div>
+            </div>}
           </div>}
+        {error &&
+          <div className="bg-linear-to-tr from-red-500/50 to-red-600/70 rounded-2xl p-5 momo-trust-display-regular text-white text-lg">
+            Error al procesar el archivo
+          </div>}     
+
       </div>
     </div>
   );
